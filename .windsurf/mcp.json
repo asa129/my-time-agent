@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "voltagent": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@voltagent/docs-mcp"
+      ],
+      "env": {}
+    }
+  }
+}
