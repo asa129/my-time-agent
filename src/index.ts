@@ -2,9 +2,19 @@ import "dotenv/config";
 import { VoltAgent, VoltOpsClient, Agent } from "@voltagent/core";
 import { createPinoLogger } from "@voltagent/logger";
 import { VercelAIProvider } from "@voltagent/vercel-ai";
-import { openai } from "@ai-sdk/openai";
 import { expenseApprovalWorkflow } from "./workflows";
-import { weatherTool } from "./tools";
+import { mistral } from "@ai-sdk/mistral";
+import {
+  checkTool,
+  clickTool,
+  getTextTool,
+  hoverTool,
+  pressKeyTool,
+  selectOptionTool,
+  typeTool,
+  uncheckTool,
+  waitForElementTool,
+} from "./tools";
 
 // Create a logger instance
 const logger = createPinoLogger({
@@ -14,10 +24,20 @@ const logger = createPinoLogger({
 
 const agent = new Agent({
   name: "my-time-agent",
-  instructions: "A helpful assistant that can check weather and help with various tasks",
+  instructions: "あなたは勤怠打刻エージェントです。",
   llm: new VercelAIProvider(),
-  model: openai("gpt-4o-mini"),
-  tools: [weatherTool],
+  model: mistral("mistral-large-latest"),
+  tools: [
+    clickTool,
+    typeTool,
+    getTextTool,
+    selectOptionTool,
+    checkTool,
+    uncheckTool,
+    hoverTool,
+    pressKeyTool,
+    waitForElementTool,
+  ],
 });
 
 new VoltAgent({
@@ -28,8 +48,4 @@ new VoltAgent({
     expenseApprovalWorkflow,
   },
   logger,
-  voltOpsClient: new VoltOpsClient({
-    publicKey: process.env.VOLTAGENT_PUBLIC_KEY || "",
-    secretKey: process.env.VOLTAGENT_SECRET_KEY || "",
-  }),
 });
