@@ -7,9 +7,14 @@ import { mistral } from "@ai-sdk/mistral";
 import {
   checkTool,
   clickTool,
+  closeBrowserTool,
   getTextTool,
+  goBackTool,
+  goForwardTool,
   hoverTool,
+  navigationTool,
   pressKeyTool,
+  refreshPageTool,
   selectOptionTool,
   typeTool,
   uncheckTool,
@@ -26,18 +31,28 @@ const logger = createPinoLogger({
 const agent = new Agent({
   name: "my-time-agent",
   instructions: `あなたは勤怠打刻エージェントです。
-  以下のサイトにアクセスして、勤怠打刻を行ってください。
-  https://login.ta.kingoftime.jp/admin
+  必ずツールを使用して実際に操作を実行してください。
   
   操作は下記の手順で実施してください。
-  1. ログイン(環境変数のIDとパスワードを使用)
-  2. 本日の勤怠を入力してください。
-  3. 勤怠時間は出勤09:00、休憩開始12:00、休憩終了13:00です。
-  4. 退勤時間は打刻時刻の丸め15分で入力してください。
+  1. ブラウザを開いて、下さい。
+  2. URLバーにhttps://login.ta.kingoftime.jp/adminを入力して更新してください。
+  3. ログイン(環境変数のYOUR_IDとYOUR_PASSWORDを使用)
+  4. 本日の勤怠を入力してください。
+  5. 勤怠時間は出勤09:00、休憩開始12:00、休憩終了13:00です。
+  6. 退勤時間は打刻時刻の丸め15分で入力してください。
   例えば、18:26分は18:30分と入力してください。
-  5. 保存後はログアウトしてください。`,
-  parameters: z.string().describe("IDとパスワード"),
+  7. 保存後はログアウトしてください。
+  
+  ※注意事項
+  * 絶対に、同意を求めないでください。手順通りに進めて下さい。
+  * 何らかの理由で、手順通りに行えない場合は、その旨を説明して下さい。
+  * ログイン時の各要素はlogin_idとlogin_password、login_buttonで定義されています。
+  `,
   llm: new VercelAIProvider(),
+  parameters: z.object({
+    YOUR_ID: z.string().describe("ユーザーID"),
+    YOUR_PASSWORD: z.string().describe("パスワード"),
+  }),
   model: mistral("mistral-large-latest"),
   tools: [
     clickTool,
@@ -49,6 +64,11 @@ const agent = new Agent({
     hoverTool,
     pressKeyTool,
     waitForElementTool,
+    navigationTool,
+    goBackTool,
+    goForwardTool,
+    refreshPageTool,
+    closeBrowserTool,
   ],
 });
 
